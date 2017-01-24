@@ -1,0 +1,75 @@
+<style>
+	#search-results-container {
+		display: none;
+	}
+	.criteria-options {
+		padding: 0px;
+		margin: 0px; 
+	}
+	.criteria-options li {
+		list-style-type: none; 
+	}
+	.criteria-options label {
+		font-weight: normal;
+		margin-bottom: 10px;
+	}
+</style>
+<div class="row">
+	<div class="col-sm-6">
+		<div class="panel panel-primary">
+			<div class="panel-heading">Terms</div>
+			<div id="terms-criteria" class="panel-body">
+				<p class="text-center">... loading ...</p>
+			</div>
+		</div>
+	</div>
+	<div class="col-sm-6">
+		<div class="panel panel-primary">
+			<div class="panel-heading">Regions</div>
+			<div id="regions-criteria" class="panel-body">
+				<p class="text-center">... loading ...</p>
+			</div>
+		</div>
+	</div>
+</div>
+<div id="search-results-container" class="row">
+	<div class="col-xs-12">
+		<div class="panel panel-primary">
+			<div class="panel-heading">Results</div>
+			<div class="table-responsive">
+				<table class="table table table-condensed table-bordered table-striped">
+					<tbody id="search-results">
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>
+<script>
+	$(document).ready(function(){
+		$.getJSON('//' + window.location.hostname + '/piapi/index.cfm?callName=getProgramSearchElements&terms=yes&region=yes&ResponseEncoding=json&callBackName=buildInterface&jsoncallback=?');
+	});
+	function _cb_buildInterface(data) {
+		// console.log(data);
+		for (var element in data.ELEMENT) {
+			elementhtml = '<ul class="criteria-options">';
+			for (var option in data.ELEMENT[element].OPTIONS.OPTION) {
+				if (data.ELEMENT[element].OPTIONS.OPTION[option].VALUE != "") {
+					elementhtml = elementhtml + '<li><label><input name="' + data.ELEMENT[element].FORM_NAME + '" type="checkbox" value="' + data.ELEMENT[element].OPTIONS.OPTION[option].VALUE.replace(/ /g,"+") + '" />&nbsp;&nbsp;' + data.ELEMENT[element].OPTIONS.OPTION[option].NAME + '</label></li>';
+				};
+			};
+			elementhtml = elementhtml + '</ul>'
+			if (data.ELEMENT[element].DISPLAY_NAME == 'Term') {
+				$('#terms-criteria').html(elementhtml);
+			} else if (data.ELEMENT[element].DISPLAY_NAME == 'Region') {
+				$('#regions-criteria').html(elementhtml);
+			};
+		};
+		$(".criteria-options input").change(function() {
+			updateResults();
+		});
+	};
+	function updateResults() {
+		// update the results
+	};
+</script>

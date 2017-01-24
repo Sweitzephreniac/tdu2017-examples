@@ -16,9 +16,7 @@
 		$.getJSON('//' + window.location.hostname + '/piapi/index.cfm?callName=getRandomFeaturedPrograms&ResponseEncoding=json&callBackName=populatePanel&jsoncallback=?');
 	});
 	function _cb_populatePanel(data){
-		console.log(data);
-		var programid = data.PROGRAM_ID;
-		var programname = data.PROGRAM_NAME;
+		// console.log(data);
 		var locationhtml = '';
 		if (data.LOCATIONS != '') {
 			locationhtml = '<ul>';
@@ -44,8 +42,8 @@
 				termshtml = termshtml + '</p>';
 			};
 		};
-		var panelhtml = '<p><strong>' + programname + '</strong><p>' + '<p>' + locationhtml + '</p>' + termshtml;
+		var panelhtml = '<p><strong>' + data.PROGRAM_NAME + '</strong><p>' + '<p>' + locationhtml + '</p>' + termshtml;
 		$('#featured-program-body').html(panelhtml);
-		$('#featured-program-footer').prepend('<a class="btn btn-primary btn-xs" href="index.cfm?FuseAction=Programs.ViewProgram&Program_ID=' + programid + '">view program</a>');
+		$('#featured-program-footer').prepend('<a class="btn btn-primary btn-xs" href="index.cfm?FuseAction=Programs.ViewProgram&Program_ID=' + data.PROGRAM_ID + '">view program</a>');
 	};
 </script>
