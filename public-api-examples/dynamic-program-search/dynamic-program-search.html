@@ -35,7 +35,7 @@
 <div id="search-results-container" class="row">
 	<div class="col-xs-12">
 		<div class="panel panel-primary">
-			<div class="panel-heading">Results</div>
+			<div class="panel-heading">Matching programs</div>
 			<div class="table-responsive">
 				<table class="table table table-condensed table-bordered table-striped">
 					<tbody id="search-results">
@@ -80,15 +80,16 @@
 			regionurlparam = regionurlparam+ $(this).val();
 		});
 		if (termurlparam == '' && regionurlparam == '') {
-			$('#search-results').css('display','none');
+			$('#search-results-container').css('display','none');
 			return;
 		};
 		$.getJSON('//' + window.location.hostname + '/piapi/index.cfm?callName=getProgramSearchResults' + termurlparam + regionurlparam + '&ResponseEncoding=json&callBackName=processResults&jsoncallback=?');
 	};
 	function _cb_processResults(data) {
-		var resultshtml = '';
+		var search = data.SEARCHVERBIAGE.split(', sorted by');
+		var resultshtml = '<tr><td>' + search[0] + '</td></tr>';
 		if (data.RECORDCOUNT == 0) {
-			resultshtml = '<tr><td class="text-center">no programs matching search options</td></tr>';
+			resultshtml = resultshtml + '<tr><td class="text-center">no programs found</td></tr>';
 		} else if (data.RECORDCOUNT == 1) {
 			resultshtml = resultshtml + '<tr><td><a href="index.cfm?FuseAction=Programs.ViewProgram&Program_ID=' + data.PROGRAM.PROGRAM_ID + '">' + data.PROGRAM.PROGRAM_NAME + '</a></td></tr>';
 		} else {
