@@ -50,7 +50,6 @@
 		$.getJSON('//' + window.location.hostname + '/piapi/index.cfm?callName=getProgramSearchElements&terms=yes&region=yes&ResponseEncoding=json&callBackName=buildInterface&jsoncallback=?');
 	});
 	function _cb_buildInterface(data) {
-		// console.log(data);
 		for (var element in data.ELEMENT) {
 			elementhtml = '<ul class="criteria-options">';
 			for (var option in data.ELEMENT[element].OPTIONS.OPTION) {
@@ -70,6 +69,23 @@
 		});
 	};
 	function updateResults() {
-		// update the results
+		var termurlparam = '';
+		$('#terms-criteria input:checked').each(function(){
+			if (termurlparam == '') { termurlparam = termurlparam + '&term='} else { termurlparam = termurlparam + '%7F%2C'};
+			termurlparam = termurlparam + $(this).val();
+		});
+		var regionurlparam = '';
+		$('#regions-criteria input:checked').each(function(){
+			if (regionurlparam == '') { regionurlparam = regionurlparam + '&region='} else { regionurlparam = regionurlparam + '%7F%2C'};
+			regionurlparam = regionurlparam+ $(this).val();
+		});
+		if (termurlparam == '' && regionurlparam == '') {
+			$('#search-results').css('display','none');
+			return;
+		};
+		$.getJSON('//' + window.location.hostname + '/piapi/index.cfm?callName=getProgramSearchResults' + termurlparam + regionurlparam + '&ResponseEncoding=json&callBackName=processResults&jsoncallback=?');
+	};
+	function _cb_processResults(data) {
+		console.log(data);
 	};
 </script>
