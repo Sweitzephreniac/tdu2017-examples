@@ -86,6 +86,21 @@
 		$.getJSON('//' + window.location.hostname + '/piapi/index.cfm?callName=getProgramSearchResults' + termurlparam + regionurlparam + '&ResponseEncoding=json&callBackName=processResults&jsoncallback=?');
 	};
 	function _cb_processResults(data) {
-		console.log(data);
+		var resultshtml = '';
+		if (data.RECORDCOUNT == 0) {
+			resultshtml = '<tr><td class="text-center">no programs matching search options</td></tr>';
+		} else if (data.RECORDCOUNT == 1) {
+			resultshtml = resultshtml + '<tr><td><a href="index.cfm?FuseAction=Programs.ViewProgram&Program_ID=' + data.PROGRAM.PROGRAM_ID + '">' + data.PROGRAM.PROGRAM_NAME + '</a></td></tr>';
+		} else {
+			var results = new Array();
+			for (var program in data.PROGRAM) {
+				if (results.indexOf(data.PROGRAM[program].PROGRAM_ID) == -1) {
+					resultshtml = resultshtml + '<tr><td><a href="index.cfm?FuseAction=Programs.ViewProgram&Program_ID=' + data.PROGRAM[program].PROGRAM_ID + '">' + data.PROGRAM[program].PROGRAM_NAME + '</a></td></tr>';
+					results.push(data.PROGRAM[program].PROGRAM_ID);
+				};
+			};
+		};
+		$('#search-results').html(resultshtml);
+		$('#search-results-container').css('display','block');
 	};
 </script>
