@@ -26,7 +26,7 @@
 				for (var location in data.LOCATIONS.LOCATION) {
 					locationhtml = locationhtml + '<li>' + data.LOCATIONS.LOCATION[location].PROGRAM_CITY + ', ' + data.LOCATIONS.LOCATION[location].PROGRAM_COUNTRY + ' (' + data.LOCATIONS.LOCATION[location].PROGRAM_REGION + ')</li>';
 				};
-				locationhtml = locationhtml + '</li>';
+				locationhtml = locationhtml + '</ul>';
 			};
 		};
 		var termshtml = '';
@@ -42,8 +42,8 @@
 				termshtml = termshtml + '</p>';
 			};
 		};
-		var panelhtml = '<p><strong>' + data.PROGRAM_NAME + '</strong><p>' + '<p>' + locationhtml + '</p>' + termshtml;
+		var panelhtml = '<p><strong>' + data.PROGRAM_NAME + '</strong></p>' + '<p>' + locationhtml + '</p>' + termshtml;
 		$('#featured-program-body').html(panelhtml);
-		$('#featured-program-footer').prepend('<a class="btn btn-primary btn-xs" href="index.cfm?FuseAction=Programs.ViewProgram&Program_ID=' + data.PROGRAM_ID + '">view program</a>');
+		$('#featured-program-footer').prepend('<a class="btn btn-primary btn-xs" href="index.cfm?FuseAction=Programs.ViewProgram&Program_ID=' + data.PROGRAM_ID + '">view program</a>&nbsp;');
 	};
 </script>
