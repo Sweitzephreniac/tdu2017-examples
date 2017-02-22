@@ -1,0 +1,53 @@
+<div class="col-sm-6 col-md-5 pull-right">
+	<div class="panel panel-primary">
+		<div class="panel-heading">Featured program</div>
+		<div id="featured-program-body" class="table-responsive">
+			<p class="text-center"><br />... loading ...<br /></p>
+		</div>
+		<div id="featured-program-footer" class="panel-footer text-center">
+			<a class="btn btn-primary btn-xs" href="index.cfm?FuseAction=Programs.FeaturedPrograms">
+				view all featured
+			</a>
+		</div>
+	</div>
+</div>
+<style>
+	#featured-program-body {
+		font-size: .9em;
+	}
+</style>
+<script>
+	$(document).ready(function(){
+		$.getJSON('//' + window.location.hostname + '/piapi/index.cfm?callName=getRandomFeaturedPrograms&ResponseEncoding=json&callBackName=populatePanel&jsoncallback=?');
+	});
+	function _cb_populatePanel(data){
+		// console.log(data);
+		var locationhtml = '';
+		if (data.LOCATIONS != '') {
+			locationhtml = '<tr><td><strong>Locations</strong></td><td>';
+			if (data.LOCATIONS.LOCATION.PROGRAM_CITY) {
+				locationhtml = locationhtml + data.LOCATIONS.LOCATION.PROGRAM_CITY + ', ' + data.LOCATIONS.LOCATION.PROGRAM_COUNTRY + ' (' + data.LOCATIONS.LOCATION.PROGRAM_REGION + ')<br />';
+			} else {
+				for (var location in data.LOCATIONS.LOCATION) {
+					locationhtml = locationhtml + data.LOCATIONS.LOCATION[location].PROGRAM_CITY + ', ' + data.LOCATIONS.LOCATION[location].PROGRAM_COUNTRY + ' (' + data.LOCATIONS.LOCATION[location].PROGRAM_REGION + ')<br />';
+				};
+			};
+			locationhtml = locationhtml.substring(0,locationhtml.length-6) + '</td></tr>';
+		};
+		var termshtml = '';
+		if (data.TERMS != '') {
+			termshtml = '<tr><td><strong>Terms offered</strong></td><td>';
+			if (data.TERMS.TERM.PROGRAM_TERM) {
+				termshtml = termshtml + data.TERMS.TERM.PROGRAM_TERM + ',';
+			} else {
+				for (var term in data.TERMS.TERM) {
+					termshtml = termshtml + data.TERMS.TERM[term].PROGRAM_TERM + ',';
+				};
+			};
+			termshtml = termshtml.substring(0,termshtml.length-1) + '</td></tr>';
+		};
+		var panelhtml = '<table class="table table-bordered table-condensed"><tr><th colspan="2" class="text-center">' + data.PROGRAM_NAME + '</th></tr>' + locationhtml + termshtml;
+		$('#featured-program-body').html(panelhtml);
+		$('#featured-program-footer').prepend('<a class="btn btn-primary btn-xs" href="index.cfm?FuseAction=Programs.ViewProgram&Program_ID=' + data.PROGRAM_ID + '">view program</a>&nbsp;');
+	};
+</script>
