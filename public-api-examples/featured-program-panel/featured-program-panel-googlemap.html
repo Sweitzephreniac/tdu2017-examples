@@ -1,0 +1,67 @@
+<div class="col-sm-6 col-md-4 pull-right">
+	<div class="panel panel-primary">
+		<div class="panel-heading">Featured program</div>
+		<div id="featured-program-body" class="panel-body">
+			<p class="text-center">... loading ...</p>
+		</div>
+		<div id="featured-program-footer" class="panel-footer text-center">
+			<a class="btn btn-primary btn-xs" href="index.cfm?FuseAction=Programs.FeaturedPrograms">
+				view all featured
+			</a>
+		</div>
+	</div>
+</div>
+<script>
+	$(document).ready(function(){
+		$.getJSON('//' + window.location.hostname + '/piapi/index.cfm?callName=getRandomFeaturedPrograms&ResponseEncoding=json&callBackName=populatePanel&jsoncallback=?');
+	});
+	function _cb_populatePanel(data){
+		console.log(data);
+		var locationhtml = '';
+		var latlongdata = [];
+		var googleapikey = 'VALID_API_KEY_HERE';
+		if (data.LOCATIONS != '') {
+			locationhtml = '<ul>';
+			if (data.LOCATIONS.LOCATION.PROGRAM_CITY) {
+				locationhtml = locationhtml + '<li>' + data.LOCATIONS.LOCATION.PROGRAM_CITY + ', ' + data.LOCATIONS.LOCATION.PROGRAM_COUNTRY + ' (' + data.LOCATIONS.LOCATION.PROGRAM_REGION + ')</li></ul>';
+				if (data.LOCATIONS.LOCATION.PROGRAM_LATITUDE != ''){
+					latlongdata.push(data.LOCATIONS.LOCATION.PROGRAM_LATITUDE + ',' + data.LOCATIONS.LOCATION.PROGRAM_LONGITUDE);
+				};
+			} else {
+				for (var location in data.LOCATIONS.LOCATION) {
+					locationhtml = locationhtml + '<li>' + data.LOCATIONS.LOCATION[location].PROGRAM_CITY + ', ' + data.LOCATIONS.LOCATION[location].PROGRAM_COUNTRY + ' (' + data.LOCATIONS.LOCATION[location].PROGRAM_REGION + ')</li>';
+					if (data.LOCATIONS.LOCATION[location].PROGRAM_LATITUDE != ''){
+						latlongdata.push(data.LOCATIONS.LOCATION[location].PROGRAM_LATITUDE + ',' + data.LOCATIONS.LOCATION[location].PROGRAM_LONGITUDE);
+					};
+				};
+				locationhtml = locationhtml + '</ul>';
+			};
+		};
+		var termshtml = '';
+		if (data.TERMS != '') {
+			termshtml = '<p><u>Terms offered:</u> ';
+			if (data.TERMS.TERM.PROGRAM_TERM) {
+				termshtml = termshtml + data.TERMS.TERM.PROGRAM_TERM + '</p>';
+			} else {
+				for (var term in data.TERMS.TERM) {
+					if (termshtml != '<p><u>Terms offered:</u> ') { termshtml = termshtml + ', '; };
+					termshtml = termshtml + data.TERMS.TERM[term].PROGRAM_TERM;
+				};
+				termshtml = termshtml + '</p>';
+			};
+		};
+		var maphtml = '';
+		if (latlongdata.length > 0) {
+			maphtml = '<img class="img-responsive" src="//maps.googleapis.com/maps/api/staticmap?maptype=terrain&size=300x300&sensor=false&markers=';
+			for (var i=0; i<latlongdata.length; i++) {
+				maphtml = maphtml + latlongdata[i] + '%7C';
+			};
+			maphtml = maphtml.substring(0,maphtml.length-3);
+			if (latlongdata.length < 2) { maphtml = maphtml + '&zoom=2'; };
+			maphtml = maphtml + '&key=' + googleapikey + '" />';
+		};
+		var panelhtml = '<p><strong>' + data.PROGRAM_NAME + '</strong></p>' + maphtml + '<p>' + locationhtml + '</p>' + termshtml;
+		$('#featured-program-body').html(panelhtml);
+		$('#featured-program-footer').prepend('<a class="btn btn-primary btn-xs" href="index.cfm?FuseAction=Programs.ViewProgram&Program_ID=' + data.PROGRAM_ID + '">view program</a>&nbsp;');
+	};
+</script>
