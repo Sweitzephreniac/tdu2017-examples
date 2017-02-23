@@ -1,0 +1,30 @@
+<!-- Add to interface field#4400 -->
+<style>
+	.padding-button{
+		margin: 10px;
+	}
+	.template-name-id{
+		display: none;
+	}
+</style>
+<div id="TabInterface" class="form-inline">
+	<select id="templateselector" class="padding-button form-control">
+		<option value="0">- import template -</option>
+	</select>
+	<input class="padding-button form-control" type="button" value="Add New Tab" onclick="showAddField();" />
+	<input type="text" class="form-control" style="display: none" id="newtab" placeholder="tab name" size="15" maxlength="25" />
+	<input type="button" class="form-control" style="display: none" value="Add" onclick="addTab();" />
+	<input class="padding-button form-control" type="button" id="fetchtabs" value="Remove Tab" onclick="fetchTabs();" />
+	<select id="tabselector" class="form-control" style="display: none">
+	</select>
+	<input type="button" class="form-control" id="removetabbutton" style="display: none" value="Remove from brochure" onclick="deleteTab();" />
+    <input type="button" id="convertbutton" class="padding-button form-control" value="Convert template" onclick="convertTemplate();" />
+</div>
+<input class="template-name-id" value="{TEMPLATE NAME}|{FILE ID#}" />
+<script>
+	$(document).ready(function() {
+		$.getScript('{URL OF TEMPLATE SCRIPT IN DOCUMENT CENTER}', function () {
+			initTabs();
+		});
+	});
+</script>

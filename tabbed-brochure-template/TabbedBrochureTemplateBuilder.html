@@ -1,0 +1,115 @@
+<html>
+	<head>
+		<meta http-equiv="Content-Language" content="en-us" />
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<style>
+			body {
+				font-family: Arial, Verdana, sans-serif;
+			}
+			#interface {
+				margin-bottom: 15px;
+                padding-top: 2px;
+                border-top-style: solid;
+                border-top-width: 2px;
+			}
+            #empty-template {
+                padding-top: 10px;   
+            }
+			#interface li:hover:before{
+				content: "Delete - ";
+			}
+			#empty-template{
+				margin: -25px 0px 15px 0px;
+			}
+			#output input{
+				display: block;
+				margin: 0px 0px 10px 0px
+			}
+			#output textarea, #style-editor textarea{
+				width: 575px;
+				height: 300px;
+			}
+            #style-editor {
+                margin-top: 10px;
+            }
+		</style>
+		<script type="text/javascript" src="http://code.jquery.com/jquery-1.11.1.js"></script>
+	</head>
+	<body>
+        <style id="tabs">        
+        </style>
+		<h1>Tabbed Brochure Template Builder</h1>
+		<div id="interface">
+            <div id="brochure-tabs-navigation">
+                <ul id="tab-list">
+                </ul>
+            </div>
+			<div id="empty-template">[no tabs in template]</div>
+			<input id="name-field" type="text" />
+			<input id="add-button" type="button" value="Add tab" />
+		</div>
+		<div id="output">
+			<input type="button" value="Generate template" />
+			<textarea readonly="readonly"></textarea>
+		</div>
+        <div id="style-editor">
+            <h3>Tab styles</h3>
+            <textarea id="tab-styles"></textarea>
+        </div>
+		<script>
+			$(document).ready(function () {
+				$('#output textarea').text('');
+				$('#name-field').val('');
+				$('#add-button').click(function () {
+					addtab();
+				});
+				$('#output input').click(function () {
+					generatetemplate();
+				});
+                $('#tab-styles').val('#brochure-tabs-navigation ul {\nlist-style: none;\npadding: 0px;\nmargin: 1px 0px 15px 0px;\n}\n\n#brochure-tabs-navigation select {\nmargin: 10px 0px;\n}\n\n.section-tab {\nborder-style: solid;\nborder-width: 0px 2px 2px 2px;\ndisplay: inline;\npadding: 3px 10px;\nmargin: 5px;\nborder-radius: 0px 0px 10px 10px;\nfont-family: Arial;\nfont-weight: bold;\nbackground-color: #FFFFFF;\ncolor: black;\nborder-color: black;\ncursor: pointer;\n}\n\n.section-tab:hover {\nbox-shadow: 0px 1px 10px -1px #000000;\nbackground-color: orangered;\n}\n\n.selected-section-tab {\nbox-shadow: 0px 1px 10px -1px #000000;\nbackground-color: powderblue;\n}\n\n.tab-float-clear {\ndisplay: none !important;\n}');
+                updatestyles();
+                $('#tab-styles').keyup(function () {
+                    updatestyles();
+                });
+			});
+			function addtab() {
+				var newtabname = $('#name-field').val();
+				if (newtabname != '') {
+					$('#tab-list').append('<li class="section-tab">' + newtabname + '</li>');
+					$('#tab-list li').last().click(function () {
+						removetab($(this).text());
+					});
+					$('#empty-template').css('display','none');
+					$('#name-field').val('');
+				}
+                updatestyles();
+			}
+			function generatetemplate() {
+				if ($('#tab-list li').length != 0) {
+					var templatehtml = '';
+					$('#tab-list li').each(function () {
+						var tabname = $(this).text();
+						tabname = tabname.replace(/ /g, '&nbsp;');
+						templatehtml = templatehtml + '\n\t<div class="tab-header">\n\t\t<h1>' + tabname + '</h1>\n\t</div>\n\t<section class="tab-content" id="' + tabname + '">Lorem ipsum</section>\n\t<div class="tab-float-clear" style="display: table; clear: both;">&nbsp;</div>';
+					});
+					$('#output textarea').text('<!-- Upload to document center as WYS object -->\n<div id="brochure-tabs-content">' + templatehtml + '\n</div>');
+				}
+			}
+			function removetab(whichone) {
+				$('#tab-list li').each(function() {
+					if ($(this).text() == whichone) {
+						$(this).remove();
+						if ($('#tab-list li').length == 0) {
+							$('#empty-template').css('display','block');	
+						}
+					}
+				});
+                updatestyles();
+			}
+            function updatestyles() {
+                $('#tabs').html($('#tab-styles').val());
+                $('#tab-list li').first().addClass('selected-section-tab');
+            }
+		</script>
+	</body>
+</html>

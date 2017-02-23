@@ -1,0 +1,72 @@
+<script>
+	/* Append to text interface field#3 */
+	$(document).ready(function(){
+		var tabs = new Array();
+		$('#brochure-tabs-content .tab-content').each(function () {
+			tabs.push($(this).attr('id'));
+		});
+		var navHtml = '<div id="brochure-tabs-navigation"><ul class="hidden-sm hidden-xs">';
+		for (var i = 0; i < tabs.length; i++) {
+			navHtml = navHtml + '<li class="section-tab">' + tabs[i] + '</li>';
+		}
+		navHtml = navHtml + '</ul><select class="form-control hidden-md hidden-lg">';
+		for (var i = 0; i < tabs.length; i++) {
+			navHtml = navHtml + '<option value="' + tabs[i] + '">' + tabs[i] + '</option>';
+		}
+		navHtml = navHtml + '</select></div>';
+		$('#brochure-tabs-content').before(navHtml);
+		$('#brochure-tabs-navigation').parent().css('padding','0px 5px 5px 5px');
+		$('#brochure-tabs-navigation li').click(function () {
+			showBrochurePanel( $(this).text() );
+		});
+		$('#brochure-tabs-navigation select').change(function () {
+			showBrochurePanel( $(this).val() );
+		});
+		$('#brochure-tabs-navigation li').first().addClass('selected-section-tab');
+		$('#brochure-tabs-content section').css('display','none');
+		$('#brochure-tabs-content .tab-content').first().css('display','block');
+		$('#brochure-tabs-content .tab-header').css('display','none');
+	});
+	function showBrochurePanel(whichone) {
+		$('#brochure-tabs-content > section').css('display','none');
+		$('#brochure-tabs-navigation li').removeClass('selected-section-tab');
+		$('#brochure-tabs-navigation li:contains(' + whichone + ')').addClass('selected-section-tab');
+		$('#brochure-tabs-navigation select').val(whichone);
+		$('#' + whichone).css('display','block');
+	}
+</script>
+<style>
+	#brochure-tabs-navigation ul {
+		list-style: none;
+		padding: 0px;
+		margin: 1px 0px 15px 0px;
+	}
+	#brochure-tabs-navigation select {
+		margin: 10px 0px;
+	}
+	.section-tab {
+		border-style: solid;
+		border-width: 0px 2px 2px 2px;
+		display: inline;
+		padding: 3px 10px;
+		margin: 5px;
+		border-radius: 0px 0px 10px 10px;
+		font-family: Arial;
+		font-weight: bold;
+		background-color: #FFFFFF;
+		color: black;
+		border-color: black;
+		cursor: pointer;
+	}
+	.section-tab:hover {
+		box-shadow: 0px 1px 10px -1px #000000;
+		background-color: orangered;
+	}
+	.selected-section-tab {
+		box-shadow: 0px 1px 10px -1px #000000;
+		background-color: powderblue;
+	}
+	.tab-float-clear {
+		display: none !important;
+	}
+</style>
