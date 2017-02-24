@@ -1,0 +1,161 @@
+<style>
+	#search-results-container {
+		display: none;
+	}
+	.criteria-options {
+		padding: 0px;
+		margin: 0px; 
+	}
+	.criteria-options li {
+		list-style-type: none; 
+	}
+	.criteria-options label {
+		font-weight: normal;
+		margin-bottom: 10px;
+	}
+</style>
+<div class="row">
+	<div class="col-sm-6">
+		<div class="panel panel-primary">
+			<div class="panel-heading">Terms</div>
+			<div id="terms-criteria" class="panel-body">
+				<p class="text-center">... loading ...</p>
+			</div>
+		</div>
+	</div>
+	<div class="col-sm-6">
+		<div class="panel panel-primary">
+			<div class="panel-heading">Regions</div>
+			<div id="regions-criteria" class="panel-body">
+				<p class="text-center">... loading ...</p>
+			</div>
+		</div>
+	</div>
+</div>
+<div id="search-results-container" class="row">
+	<div class="col-xs-12">
+		<div class="panel panel-primary">
+			<div class="panel-heading">Matching programs</div>
+			<div class="table-responsive">
+				<table class="table table table-condensed table-bordered table-striped">
+					<tbody id="search-results">
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>
+<script>
+	$(document).ready(function(){
+		$.getJSON('//' + window.location.hostname + '/piapi/index.cfm?callName=getProgramSearchElements&terms=yes&region=yes&ResponseEncoding=json&callBackName=buildInterface&jsoncallback=?');
+	});
+	function _cb_buildInterface(data) {
+		for (var element in data.ELEMENT) {
+			elementhtml = '<ul class="criteria-options">';
+			for (var option in data.ELEMENT[element].OPTIONS.OPTION) {
+				if (data.ELEMENT[element].OPTIONS.OPTION[option].VALUE != "") {
+					elementhtml = elementhtml + '<li><label><input name="' + data.ELEMENT[element].FORM_NAME + '" type="checkbox" value="' + data.ELEMENT[element].OPTIONS.OPTION[option].VALUE.replace(/ /g,"+") + '" />&nbsp;&nbsp;' + data.ELEMENT[element].OPTIONS.OPTION[option].NAME + '</label></li>';
+				};
+			};
+			elementhtml = elementhtml + '</ul>'
+			if (data.ELEMENT[element].DISPLAY_NAME == 'Term') {
+				$('#terms-criteria').html(elementhtml);
+			} else if (data.ELEMENT[element].DISPLAY_NAME == 'Region') {
+				$('#regions-criteria').html(elementhtml);
+			};
+		};
+		checkStateCookie();
+		$(".criteria-options input").change(function() {
+			updateResults();
+		});
+	};
+	function updateResults() {
+		var termurlparam = '';
+		$('#terms-criteria input:checked').each(function(){
+			if (termurlparam == '') { termurlparam = termurlparam + '&term='} else { termurlparam = termurlparam + '%7F%2C'};
+			termurlparam = termurlparam + $(this).val();
+		});
+		var regionurlparam = '';
+		$('#regions-criteria input:checked').each(function(){
+			if (regionurlparam == '') { regionurlparam = regionurlparam + '&region='} else { regionurlparam = regionurlparam + '%7F%2C'};
+			regionurlparam = regionurlparam+ $(this).val();
+		});
+		if (termurlparam == '' && regionurlparam == '') {
+			$('#search-results-container').css('display','none');
+			return;
+		};
+		saveStateCookie();
+		$.getJSON('//' + window.location.hostname + '/piapi/index.cfm?callName=getProgramSearchResults' + termurlparam + regionurlparam + '&ResponseEncoding=json&callBackName=processResults&jsoncallback=?');
+	};
+	function _cb_processResults(data) {
+		var search = data.SEARCHVERBIAGE.split(', sorted by');
+		var resultshtml = '<tr><td>' + search[0] + '</td></tr>';
+		if (data.RECORDCOUNT == 0) {
+			resultshtml = resultshtml + '<tr><td class="text-center">no programs found</td></tr>';
+		} else if (data.RECORDCOUNT == 1) {
+			resultshtml = resultshtml + '<tr><td><a href="index.cfm?FuseAction=Programs.ViewProgram&Program_ID=' + data.PROGRAM.PROGRAM_ID + '">' + data.PROGRAM.PROGRAM_NAME + '</a></td></tr>';
+		} else {
+			var results = new Array();
+			for (var program in data.PROGRAM) {
+				if (results.indexOf(data.PROGRAM[program].PROGRAM_ID) == -1) {
+					resultshtml = resultshtml + '<tr><td><a href="index.cfm?FuseAction=Programs.ViewProgram&Program_ID=' + data.PROGRAM[program].PROGRAM_ID + '">' + data.PROGRAM[program].PROGRAM_NAME + '</a></td></tr>';
+					results.push(data.PROGRAM[program].PROGRAM_ID);
+				};
+			};
+		};
+		$('#search-results').html(resultshtml);
+		$('#search-results-container').css('display','block');
+	};
+	function checkStateCookie(){
+		var hasstatecookie = 0;
+		var cookieoptions = getCookie('terms');
+		if (cookieoptions != "") {
+			cookieoptions = cookieoptions.split("||")
+			$('#terms-criteria input').each(function () {
+				if (cookieoptions.indexOf($(this).val()) > -1) {
+					$(this).attr("checked", true);
+					hasstatecookie = 1;
+				}
+			});
+		};
+		var cookieoptions = getCookie('regions');
+		if (cookieoptions != "") {
+			cookieoptions = cookieoptions.split("||")
+			$('#regions-criteria input').each(function () {
+				if (cookieoptions.indexOf($(this).val()) > -1) {
+					$(this).attr("checked", true);
+					hasstatecookie = 1;
+				}
+			});
+		};
+		if (hasstatecookie == 1) { updateResults(); };
+	};
+	function getCookie(cname) {
+		var name = cname + "=";
+		var ca = document.cookie.split(';');
+		for(var i=0; i<ca.length; i++) {
+			var c = ca[i].trim();
+			if (c.indexOf(name)==0) return c.substring(name.length,c.length);
+		}
+		return "";
+	};
+	function saveStateCookie() {
+		var selectedoptions = "";
+		$('#terms-criteria input').each(function () {
+			if ($(this).is(':checked')) {
+				if (selectedoptions != "") {selectedoptions = selectedoptions + '||';};
+				selectedoptions = selectedoptions + $(this).val();
+			};
+			document.cookie = "terms=" + selectedoptions;
+		});
+		selectedoptions = "";
+		$('#regions-criteria input').each(function () {
+			if ($(this).is(':checked')) {
+				if (selectedoptions != "") {selectedoptions = selectedoptions + '||';};
+				selectedoptions = selectedoptions + $(this).val();
+			};
+			document.cookie = "regions=" + selectedoptions;
+		});
+	};
+
+</script>
