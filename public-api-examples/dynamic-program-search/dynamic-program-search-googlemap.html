@@ -1,0 +1,187 @@
+<style>
+	#search-results-container, #map-container {
+		display: none;
+	}
+	#map-canvas {
+		height: 350px;
+	}
+	.criteria-options {
+		padding: 0px;
+		margin: 0px; 
+	}
+	.criteria-options li {
+		list-style-type: none; 
+	}
+	.criteria-options label {
+		font-weight: normal;
+		margin-bottom: 10px;
+	}
+</style>
+<div class="row">
+	<div class="col-sm-6">
+		<div class="panel panel-primary">
+			<div class="panel-heading">Terms</div>
+			<div id="terms-criteria" class="panel-body">
+				<p class="text-center">... loading ...</p>
+			</div>
+		</div>
+	</div>
+	<div class="col-sm-6">
+		<div class="panel panel-primary">
+			<div class="panel-heading">Regions</div>
+			<div id="regions-criteria" class="panel-body">
+				<p class="text-center">... loading ...</p>
+			</div>
+		</div>
+	</div>
+</div>
+<div id="map-container" class="row">
+	<div class="col-xs-12">
+		<div class="panel-heading">Matching programs</div>
+		<div class="panel-body" id="map-canvas">
+		</div>
+	</div>
+</div>
+<div id="search-results-container" class="row">
+	<div class="col-xs-12">
+		<div class="panel panel-primary">
+			<div class="panel-heading">Matching programs</div>
+			<div class="table-responsive">
+				<table class="table table table-condensed table-bordered table-striped">
+					<tbody id="search-results">
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>
+<script>
+	var googleapikey = 'VALID_API_KEY_HERE';
+	$(document).ready(function(){
+		$.getJSON('//' + window.location.hostname + '/piapi/index.cfm?callName=getProgramSearchElements&terms=yes&region=yes&ResponseEncoding=json&callBackName=buildInterface&jsoncallback=?');
+		if (googleapikey != "VALID_API_KEY_HERE") {
+			loadMapScript();
+		}
+	});
+	function _cb_buildInterface(data) {
+		for (var element in data.ELEMENT) {
+			elementhtml = '<ul class="criteria-options">';
+			for (var option in data.ELEMENT[element].OPTIONS.OPTION) {
+				if (data.ELEMENT[element].OPTIONS.OPTION[option].VALUE != "") {
+					elementhtml = elementhtml + '<li><label><input name="' + data.ELEMENT[element].FORM_NAME + '" type="checkbox" value="' + data.ELEMENT[element].OPTIONS.OPTION[option].VALUE.replace(/ /g,"+") + '" />&nbsp;&nbsp;' + data.ELEMENT[element].OPTIONS.OPTION[option].NAME + '</label></li>';
+				};
+			};
+			elementhtml = elementhtml + '</ul>'
+			if (data.ELEMENT[element].DISPLAY_NAME == 'Term') {
+				$('#terms-criteria').html(elementhtml);
+			} else if (data.ELEMENT[element].DISPLAY_NAME == 'Region') {
+				$('#regions-criteria').html(elementhtml);
+			};
+		};
+		$(".criteria-options input").change(function() {
+			updateResults();
+		});
+	};
+	function updateResults() {
+		var termurlparam = '';
+		$('#terms-criteria input:checked').each(function(){
+			if (termurlparam == '') { termurlparam = termurlparam + '&term='} else { termurlparam = termurlparam + '%7F%2C'};
+			termurlparam = termurlparam + $(this).val();
+		});
+		var regionurlparam = '';
+		$('#regions-criteria input:checked').each(function(){
+			if (regionurlparam == '') { regionurlparam = regionurlparam + '&region='} else { regionurlparam = regionurlparam + '%7F%2C'};
+			regionurlparam = regionurlparam+ $(this).val();
+		});
+		if (termurlparam == '' && regionurlparam == '') {
+			$('#search-results-container').css('display','none');
+			return;
+		};
+		$.getJSON('//' + window.location.hostname + '/piapi/index.cfm?callName=getProgramSearchResults' + termurlparam + regionurlparam + '&ResponseEncoding=json&callBackName=processResults&jsoncallback=?');
+	};
+	function _cb_processResults(data) {
+		var search = data.SEARCHVERBIAGE.split(', sorted by');
+		var resultshtml = '<tr><td>' + search[0] + '</td></tr>';
+		var markerarray = new Array();
+		if (data.RECORDCOUNT == 0) {
+			resultshtml = resultshtml + '<tr><td class="text-center">no programs found</td></tr>';
+		} else if (data.RECORDCOUNT == 1) {
+			resultshtml = resultshtml + '<tr><td><a href="index.cfm?FuseAction=Programs.ViewProgram&Program_ID=' + data.PROGRAM.PROGRAM_ID + '">' + data.PROGRAM.PROGRAM_NAME + '</a></td></tr>';
+			if (data.PROGRAM.PROGRAM_LATITUDE != "") {
+				markerarray.push(data.PROGRAM.PROGRAM_LATITUDE + "||" + data.PROGRAM.PROGRAM_LONGITUDE + "||" + data.PROGRAM.PROGRAM_ID + "||" + data.PROGRAM.PROGRAM_NAME);
+			};
+		} else {
+			var results = new Array();
+			for (var program in data.PROGRAM) {
+				if (results.indexOf(data.PROGRAM[program].PROGRAM_ID) == -1) {
+					resultshtml = resultshtml + '<tr><td><a href="index.cfm?FuseAction=Programs.ViewProgram&Program_ID=' + data.PROGRAM[program].PROGRAM_ID + '">' + data.PROGRAM[program].PROGRAM_NAME + '</a></td></tr>';
+					results.push(data.PROGRAM[program].PROGRAM_ID);
+				};
+				if (data.PROGRAM[program].PROGRAM_LATITUDE != "") {
+					markerArray.push(data.PROGRAM[program].PROGRAM_LATITUDE + "||" + data.PROGRAM[program].PROGRAM_LONGITUDE + "||" + data.PROGRAM[program].PROGRAM_ID + "||" + data.PROGRAM[program].PROGRAM_NAME);
+				};
+			};
+		};
+		$('#search-results').html(resultshtml);
+		$('#search-results-container').css('display','block');
+		if (googleapikey != "VALID_API_KEY_HERE") {
+			if (markerarray.length > 0) {
+				$('#map-container').css('display','block');
+				var worldmap = buildMap();
+				drawMarkers(markerArray, worldmap);
+			};
+		};
+	};
+	function loadMapScript() {
+		var script = document.createElement('script');
+		script.type = 'text/javascript';
+		script.src = '//maps.googleapis.com/maps/api/js?key=' + googleapikey + '&sensor=false&callback=buildMap';
+		document.body.appendChild(script);
+	};
+	function buildMap() {
+		var mapoptions = {
+		center: new google.maps.LatLng(34.033333, -6.85),
+		zoom: 1,
+		disableDefaultUI: true
+		};
+		var worldmap = new google.maps.Map(document.getElementById("map-canvas"),mapoptions);
+		return worldmap;
+	};
+	function drawMarkers(markers, worldmap){
+		var markerArray = new Array();
+		var infowindow = new google.maps.InfoWindow();
+		var markerDataArray = new Array();
+		for (var i = 0; i < markers.length; i++){
+			var progInfo = markers[i].split("||");
+			var markerData = new Object();
+			markerDataArray[i] = markerData;
+			markerDataArray[i].position = new google.maps.LatLng(progInfo[0],progInfo[1]);
+			markerDataArray[i].contentString = '<div style="line-height:1.35; overflow:hidden; white-space:nowrap;"><a href="' + sitedomain + 'index.cfm?FuseAction=Programs.ViewProgram&Program_ID=' + progInfo[2] + '">' + progInfo[3] + '</a></div>';
+			markerDataArray[i].title = progInfo[3];
+		};
+		for (var i = 0; i < markerDataArray.length; i ++){
+			for (var j = 0; j < markerDataArray.length; j++){
+				if (markerDataArray[i].position.equals(markerDataArray[j].position)){
+					if (markerDataArray[i].title.valueOf() != markerDataArray[j].title.valueOf()) {
+						markerDataArray[i].contentString = markerDataArray[i].contentString + markerDataArray[j].contentString;
+						markerDataArray[i].title = markerDataArray[i].title + "/n" + markerDataArray[j].title;
+						markerDataArray.splice(j, 1);
+						j = j - 1;
+					};
+				};
+			};
+		};	
+		for (var i = 0; i < markerDataArray.length; i ++){
+			markerArray[i] = new google.maps.Marker({
+				position: markerDataArray[i].position,
+				map: worldmap,
+				title: markerDataArray[i].progInfo
+			});
+			markerArray[i].set('popup', markerDataArray[i].contentString);
+			google.maps.event.addListener(markerArray[i], 'mouseover', function() {
+				infowindow.setContent(this.get('popup'));
+				infowindow.open(worldmap,this);
+			});
+		};
+	};
+</script>
