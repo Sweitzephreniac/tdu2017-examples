@@ -37,8 +37,9 @@
 </div>
 <div id="map-container" class="row">
 	<div class="col-xs-12">
-		<div class="panel-heading">Matching programs</div>
-		<div class="panel-body" id="map-canvas">
+		<div class="panel panel-primary">
+			<div class="panel-body" id="map-canvas">
+			</div>
 		</div>
 	</div>
 </div>
@@ -56,12 +57,10 @@
 	</div>
 </div>
 <script>
-	var googleapikey = 'VALID_API_KEY_HERE';
+	var googleapikey = 'AIzaSyBrX5cqmLbVNR2EgEa4_BplJkisbrpq3tQ'; // requires a valid Google API key
 	$(document).ready(function(){
 		$.getJSON('//' + window.location.hostname + '/piapi/index.cfm?callName=getProgramSearchElements&terms=yes&region=yes&ResponseEncoding=json&callBackName=buildInterface&jsoncallback=?');
-		if (googleapikey != "VALID_API_KEY_HERE") {
-			loadMapScript();
-		}
+		loadMapScript();
 	});
 	function _cb_buildInterface(data) {
 		for (var element in data.ELEMENT) {
@@ -118,18 +117,18 @@
 					results.push(data.PROGRAM[program].PROGRAM_ID);
 				};
 				if (data.PROGRAM[program].PROGRAM_LATITUDE != "") {
-					markerArray.push(data.PROGRAM[program].PROGRAM_LATITUDE + "||" + data.PROGRAM[program].PROGRAM_LONGITUDE + "||" + data.PROGRAM[program].PROGRAM_ID + "||" + data.PROGRAM[program].PROGRAM_NAME);
+					markerarray.push(data.PROGRAM[program].PROGRAM_LATITUDE + "||" + data.PROGRAM[program].PROGRAM_LONGITUDE + "||" + data.PROGRAM[program].PROGRAM_ID + "||" + data.PROGRAM[program].PROGRAM_NAME);
 				};
 			};
 		};
 		$('#search-results').html(resultshtml);
 		$('#search-results-container').css('display','block');
-		if (googleapikey != "VALID_API_KEY_HERE") {
-			if (markerarray.length > 0) {
-				$('#map-container').css('display','block');
-				var worldmap = buildMap();
-				drawMarkers(markerArray, worldmap);
-			};
+		if (markerarray.length > 0) {
+			$('#map-container').css('display','block');
+			var worldmap = buildMap();
+			drawMarkers(markerarray, worldmap);
+		} else {
+			$('#map-container').css('display','none');
 		};
 	};
 	function loadMapScript() {
@@ -141,7 +140,7 @@
 	function buildMap() {
 		var mapoptions = {
 		center: new google.maps.LatLng(34.033333, -6.85),
-		zoom: 1,
+		zoom: 2,
 		disableDefaultUI: true
 		};
 		var worldmap = new google.maps.Map(document.getElementById("map-canvas"),mapoptions);
@@ -156,7 +155,7 @@
 			var markerData = new Object();
 			markerDataArray[i] = markerData;
 			markerDataArray[i].position = new google.maps.LatLng(progInfo[0],progInfo[1]);
-			markerDataArray[i].contentString = '<div style="line-height:1.35; overflow:hidden; white-space:nowrap;"><a href="' + sitedomain + 'index.cfm?FuseAction=Programs.ViewProgram&Program_ID=' + progInfo[2] + '">' + progInfo[3] + '</a></div>';
+			markerDataArray[i].contentString = '<div style="line-height:1.35; overflow:hidden; white-space:nowrap;"><a href="//' + window.location.hostname + '/index.cfm?FuseAction=Programs.ViewProgram&Program_ID=' + progInfo[2] + '">' + progInfo[3] + '</a></div>';
 			markerDataArray[i].title = progInfo[3];
 		};
 		for (var i = 0; i < markerDataArray.length; i ++){
