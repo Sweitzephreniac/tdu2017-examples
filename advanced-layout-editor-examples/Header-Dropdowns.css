@@ -1,0 +1,97 @@
+/*Header Menu Dropdowns*/
+.floatleft{float: left}
+.floatright{float: right}
+
+/*override internal style for custom HTML*/
+header{padding: 20px 20px 20px 40px !important;box-shadow: none;background: #fff}
+body{background-color: #f6f6f8}
+.clearfix:after {content: " ";display: block;height: 0;font-size: 1px;line-height: 0px;clear: both}
+ul.menulist{margin:0;padding:15px 0 0 0}
+footer{background-color: #fff}
+
+ul.menulist > li{
+list-style-image: none;
+list-style: none;
+display: inline-block; 
+margin: 0 5px 0; 
+padding: 0 13px;
+color: #666;
+display: inline-block;
+
+letter-spacing: .07em;
+font-weight: 400;
+font-family: ProximaNova, proxima-nova, Arial, Helvetica, sans-serif;
+font-size: 16px;
+  
+}
+
+ul.menulist > li > a {
+
+    color: #666;
+	text-transform: uppercase;
+}
+
+ul.menulist > li > a:hover {
+
+    color: #249b95;
+	text-decoration: none;
+}
+
+ul.menulist li.dropdown{cursor:default}
+.menulist .dropdown-menu {
+	position: absolute;
+	top: 100%;
+	left: 0;
+	z-index: 1000;
+	display: none;
+	float: none;
+	min-width: 160px;
+	padding: 0;
+	margin: 0;
+	list-style: none;
+	font-size: 14px;
+	text-align: left;
+	background-color: none;
+	border: none;
+	border-radius: 0;
+	box-shadow: none;
+	-webkit-background-clip: padding-box;
+	background-clip: padding-box;
+
+	background: #FFF;
+	line-height: 24px;
+}
+.menulist .dropdown-menu li:first-child {
+    border-top: 1px solid rgba(102, 102, 102, 0.12);
+}
+.menulist .dropdown-menu li {
+    /*font-family: ProximaNova,proxima-nova;*/
+    color: #666;
+    text-align: left;
+    font-size: 14px;
+    line-height: 24px;
+    list-style: none;
+    
+    margin: 0 !important;
+    font-weight: 300;
+    background: 0 0;
+    white-space: nowrap;
+    cursor: default;
+   
+    border: 1px solid rgba(102, 102, 102, 0.12);
+    border-top: none;
+}
+.menulist .dropdown-menu > li > a {
+    padding: 10px 25px;
+}
+.menulist .dropdown-menu > li > a {
+    color: #666;
+}
+
+.dropdown-menu > li > a {
+
+    color: #666;
+}
+
+@media(max-width:768px){header{padding: 20px !important}}
+/*Header Menu Dropdowns*/
