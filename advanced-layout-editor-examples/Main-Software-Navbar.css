@@ -1,0 +1,42 @@
+/* dropdowns */
+.dropdown-menu>.active>a, .dropdown-menu>.active>a:hover, .dropdown-menu>.active>a:focus {
+	background-color:#127772;
+	font-color: #fff;
+}
+
+/* navs */
+
+.navbar-inverse{
+	background-color:#249b95;
+	border-color:#249b95;
+}
+
+.navbar-inverse .navbar-nav > li > a {
+	color:#fff;
+}
+
+.navbar-inverse .navbar-nav > li > a:hover,.navbar-inverse .navbar-nav > li > a:focus {
+	color:#000;
+}
+
+.navbar-inverse .navbar-nav>.open>a, .navbar-inverse .navbar-nav>.open>a:hover, .navbar-inverse .navbar-nav>.open>a:focus {
+	background-color:#127772;
+	border-color:#127772;
+	color: #fff;
+}
+
+.navbar-inverse .navbar-nav>.active>a, .navbar-inverse .navbar-nav>.active>a:hover, .navbar-inverse .navbar-nav>.active>a:focus {
+	background-color:#127772;
+	border-color:#127772;
+	font-color: #fff;
+}
+
+.navbar-inverse .navbar-text {
+	color:#fff;
+}
+
+#pagenav .fullname-xs {
+	color: #fff;
+    margin: 0 0 0 17px;
+    font-size: 1.5em;
+}	
